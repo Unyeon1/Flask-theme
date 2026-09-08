@@ -175,7 +175,7 @@
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid var(--border-color);
       border-radius: 10px;
-      padding: 10px 6px 12px 6px;
+      padding: 8px 6px 12px 6px;
       width: 135px;
       min-width: 135px;
       display: flex;
@@ -210,22 +210,24 @@
       opacity: 1;
     }
 
+    /* 상단 영역 크기와 높이 축소 */
     .theme-title-box {
       width: 100%;
-      height: 24px;
+      height: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
-    .theme-input, .theme-text-static {
+    /* 일반 입력 시 스타일 */
+    .theme-input {
       background: transparent;
       border: none;
       color: #f1f5f9;
       font-family: 'Noto Sans KR', sans-serif;
       font-weight: 700;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       text-align: center;
       padding: 0;
       margin: 0;
@@ -236,11 +238,28 @@
       text-overflow: ellipsis;
     }
 
+    /* 캡처 시 변환될 전용 텍스트 스타일 (폰트 크기 줄임, 위치 상단으로 조정) */
+    .theme-text-static {
+      color: #f1f5f9;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem; /* 폰트 크기 축소 */
+      line-height: 1;
+      text-align: center;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px; /* 아래 구분선과 격리 */
+      transform: translateY(-1px); /* 수직으로 위로 밀어올림 */
+    }
+
+    /* 구분선 간격 조절 */
     .theme-divider {
       width: 85%;
       height: 1px;
       background-color: var(--border-color);
-      margin-top: 6px;
+      margin-top: 4px;
       margin-bottom: 12px;
     }
 
@@ -510,13 +529,13 @@
     renderFlasks();
   }
 
+  /* 플로피디스크 저장 버튼 눌렀을 때만 폰트 크기 축소 및 위치 상승 보정 */
   function generateImage() {
     document.fonts.ready.then(() => {
-      // 1. input 요소들을 div 순수 텍스트로 임시 변경 (html2canvas 렌더링 위치 오차 방지)
       const titleBoxes = document.querySelectorAll('.theme-title-box');
       const savedInputs = [];
 
-      titleBoxes.forEach((box, i) => {
+      titleBoxes.forEach((box) => {
         const input = box.querySelector('.theme-input');
         savedInputs.push(input);
         const staticDiv = document.createElement('div');
@@ -529,7 +548,6 @@
       const captureTarget = document.getElementById('capture-area');
       const rect = captureTarget.getBoundingClientRect();
 
-      // 2. 캡처 수행
       html2canvas(captureTarget, {
         backgroundColor: '#1e293b',
         scale: 2,
@@ -537,7 +555,6 @@
         width: rect.width,
         height: rect.height
       }).then(canvas => {
-        // 3. 캡처 완료 후 원래 input 요소 복원
         titleBoxes.forEach((box, i) => {
           box.innerHTML = '';
           box.appendChild(savedInputs[i]);
