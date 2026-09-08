@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>시장 거래대금 흐름</title>
-  <!-- 폰트 일치 및 캡처 깨짐 방지를 위해 Noto Sans KR 로드 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
@@ -211,33 +210,38 @@
       opacity: 1;
     }
 
-    /* 텍스트 위치 및 폰트 오차 고정 */
-    .theme-input {
+    .theme-title-box {
+      width: 100%;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .theme-input, .theme-text-static {
       background: transparent;
       border: none;
       color: #f1f5f9;
       font-family: 'Noto Sans KR', sans-serif;
       font-weight: 700;
-      font-size: 0.78rem;
+      font-size: 0.82rem;
       text-align: center;
       padding: 0;
-      height: 20px;
-      line-height: 20px;
+      margin: 0;
       width: 100%;
-      margin-top: 4px;
-      margin-bottom: 0;
       outline: none;
+      white-space: nowrap;
+      overflow: hidden;
       text-overflow: ellipsis;
-      display: block;
     }
 
-    /* 구분선 수직 거리 확보 */
     .theme-divider {
       width: 85%;
       height: 1px;
       background-color: var(--border-color);
       margin-top: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .flask-visual {
@@ -410,7 +414,9 @@
 
       card.innerHTML = `
         ${flasks.length > 1 ? `<button class="delete-btn" onclick="removeFlask(${index})" title="삭제">✕</button>` : ''}
-        <input type="text" class="theme-input" value="${flask.name}" onchange="updateName(${index}, this.value)" placeholder="테마명" />
+        <div class="theme-title-box">
+          <input type="text" class="theme-input" value="${flask.name}" onchange="updateName(${index}, this.value)" placeholder="테마명" />
+        </div>
         <div class="theme-divider"></div>
         
         <div class="flask-visual">
@@ -505,11 +511,25 @@
   }
 
   function generateImage() {
-    // 폰트 로드 완료 후 캡처 진행
     document.fonts.ready.then(() => {
+      // 1. input 요소들을 div 순수 텍스트로 임시 변경 (html2canvas 렌더링 위치 오차 방지)
+      const titleBoxes = document.querySelectorAll('.theme-title-box');
+      const savedInputs = [];
+
+      titleBoxes.forEach((box, i) => {
+        const input = box.querySelector('.theme-input');
+        savedInputs.push(input);
+        const staticDiv = document.createElement('div');
+        staticDiv.className = 'theme-text-static';
+        staticDiv.innerText = input.value;
+        box.innerHTML = '';
+        box.appendChild(staticDiv);
+      });
+
       const captureTarget = document.getElementById('capture-area');
       const rect = captureTarget.getBoundingClientRect();
 
+      // 2. 캡처 수행
       html2canvas(captureTarget, {
         backgroundColor: '#1e293b',
         scale: 2,
@@ -517,6 +537,12 @@
         width: rect.width,
         height: rect.height
       }).then(canvas => {
+        // 3. 캡처 완료 후 원래 input 요소 복원
+        titleBoxes.forEach((box, i) => {
+          box.innerHTML = '';
+          box.appendChild(savedInputs[i]);
+        });
+
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
         const container = document.getElementById('imageContainer');
         
