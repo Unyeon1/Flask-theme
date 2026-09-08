@@ -18,320 +18,42 @@
       --accent-hover: #0284c7;
       --border-color: #334155;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 1000px;
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: 14px;
-      width: 100%;
-    }
-
-    header h1 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #e2e8f0;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    header p {
-      font-size: 0.8rem;
-      color: var(--text-sub);
-    }
-
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 14px;
-      width: 100%;
-      flex-wrap: wrap;
-    }
-
-    .btn-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      background-color: var(--accent-blue);
-      color: #0f172a;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: 700;
-      font-size: 0.82rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .btn:hover {
-      background-color: var(--accent-hover);
-      color: #fff;
-    }
-
-    .btn-secondary {
-      background-color: #334155;
-      color: #e2e8f0;
-    }
-
-    .btn-secondary:hover {
-      background-color: #475569;
-      color: #fff;
-    }
-
-    .btn-mode {
-      background-color: #334155;
-      color: #e2e8f0;
-      border: 1px solid var(--border-color);
-    }
-
-    .btn-mode.active {
-      background-color: #0284c7;
-      color: #ffffff;
-      border-color: #38bdf8;
-    }
-
-    .icon-btn {
-      padding: 6px 10px;
-      font-size: 0.95rem;
-    }
-
-    .status-badge {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--accent-blue);
-      background: rgba(56, 189, 248, 0.1);
-      padding: 4px 8px;
-      border-radius: 4px;
-      border: 1px solid rgba(56, 189, 248, 0.2);
-    }
-
-    .status-badge.exceeded {
-      color: #f87171;
-      background: rgba(248, 113, 113, 0.1);
-      border-color: rgba(248, 113, 113, 0.2);
-    }
-
-    .capture-wrapper {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-    }
-
-    #capture-area {
-      background-color: var(--card-bg);
-      padding: 12px;
-      border-radius: 10px;
-      display: inline-block;
-      width: fit-content;
-      box-sizing: border-box;
-    }
-
-    .flasks-grid {
-      display: flex;
-      flex-direction: row;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .flask-card {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 10px 6px 12px 6px;
-      width: 135px;
-      min-width: 135px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      box-sizing: border-box;
-    }
-
-    .delete-btn {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      background: #ef4444;
-      color: white;
-      border: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      font-size: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
-      opacity: 0.7;
-      transition: opacity 0.2s;
-      z-index: 2;
-    }
-
-    .delete-btn:hover {
-      opacity: 1;
-    }
-
-    .theme-title-box {
-      width: 100%;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .theme-input {
-      background: transparent;
-      border: none;
-      color: #f1f5f9;
-      font-family: 'Noto Sans KR', sans-serif;
-      font-weight: 700;
-      font-size: 0.8rem;
-      text-align: center;
-      padding: 0;
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      outline: none;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .theme-divider {
-      width: 85%;
-      height: 1px;
-      background-color: var(--border-color);
-      margin-top: 4px;
-      margin-bottom: 10px;
-    }
-
-    .flask-visual {
-      width: 65px;
-      height: 92px;
-      margin: 2px 0;
-      display: block;
-    }
-
-    .percentage-badge {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--accent-blue);
-      margin-top: 4px;
-    }
-
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      width: 100%;
-      justify-content: center;
-      margin-top: 8px;
-    }
-
-    .step-btn {
-      background: #334155;
-      color: #fff;
-      border: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 4px;
-      font-weight: bold;
-      font-size: 0.7rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .step-btn:hover {
-      background: var(--accent-blue);
-      color: #0f172a;
-    }
-
-    .slider {
-      width: 42px;
-      accent-color: var(--accent-blue);
-      height: 4px;
-    }
-
-    .image-preview-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.9);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      padding: 16px;
-    }
-
-    .image-preview-overlay img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-
-    .image-preview-overlay p {
-      color: var(--accent-blue);
-      font-size: 0.85rem;
-      margin-top: 12px;
-      font-weight: 700;
-    }
-
-    .close-btn {
-      margin-top: 16px;
-      background: #334155;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); padding: 12px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 1000px; background-color: var(--card-bg); border-radius: 12px; padding: 16px; box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; }
+    header { text-align: center; margin-bottom: 14px; width: 100%; }
+    header h1 { font-size: 1.25rem; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    header p { font-size: 0.8rem; color: var(--text-sub); }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 14px; width: 100%; flex-wrap: wrap; }
+    .btn-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .btn { background-color: var(--accent-blue); color: #0f172a; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 0.82rem; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px; }
+    .btn:hover { background-color: var(--accent-hover); color: #fff; }
+    .btn-secondary { background-color: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background-color: #475569; color: #fff; }
+    .btn-mode { background-color: #334155; color: #e2e8f0; border: 1px solid var(--border-color); }
+    .btn-mode.active { background-color: #0284c7; color: #ffffff; border-color: #38bdf8; }
+    .icon-btn { padding: 6px 10px; font-size: 0.95rem; }
+    .status-badge { font-size: 0.8rem; font-weight: 700; color: var(--accent-blue); background: rgba(56, 189, 248, 0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.2); }
+    .status-badge.exceeded { color: #f87171; background: rgba(248, 113, 113, 0.1); border-color: rgba(248, 113, 113, 0.2); }
+    .capture-wrapper { width: 100%; display: flex; justify-content: center; }
+    #capture-area { background-color: var(--card-bg); padding: 12px; border-radius: 10px; display: inline-block; width: fit-content; box-sizing: border-box; }
+    .flasks-grid { display: flex; flex-direction: row; gap: 10px; align-items: center; }
+    .flask-card { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 6px 12px 6px; width: 135px; min-width: 135px; display: flex; flex-direction: column; align-items: center; position: relative; box-sizing: border-box; }
+    .delete-btn { position: absolute; top: 4px; right: 4px; background: #ef4444; color: white; border: none; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; opacity: 0.7; transition: opacity 0.2s; z-index: 2; }
+    .delete-btn:hover { opacity: 1; }
+    .theme-title-box { width: 100%; height: 28px; display: flex; align-items: center; justify-content: center; }
+    .theme-input { background: transparent; border: none; color: #f1f5f9; font-family: 'Noto Sans KR', sans-serif; font-weight: 700; font-size: 0.8rem; text-align: center; padding: 0; margin: 0; width: 100%; height: 100%; outline: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: center; }
+    .theme-divider { width: 85%; height: 1px; background-color: var(--border-color); margin-top: 4px; margin-bottom: 10px; }
+    .flask-visual { width: 65px; height: 92px; margin: 2px 0; display: block; }
+    .percentage-badge { font-size: 0.95rem; font-weight: 700; color: var(--accent-blue); margin-top: 4px; }
+    .controls { display: flex; align-items: center; gap: 3px; width: 100%; justify-content: center; margin-top: 8px; }
+    .step-btn { background: #334155; color: #fff; border: none; width: 22px; height: 22px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; cursor: pointer; transition: background 0.2s; }
+    .step-btn:hover { background: var(--accent-blue); color: #0f172a; }
+    .slider { width: 42px; accent-color: var(--accent-blue); height: 4px; }
+    .image-preview-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; padding: 16px; }
+    .image-preview-overlay img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    .image-preview-overlay p { color: var(--accent-blue); font-size: 0.85rem; margin-top: 12px; font-weight: 700; }
+    .close-btn { margin-top: 16px; background: #334155; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -406,14 +128,10 @@
     }
   }
 
-  /* ------- 캔버스로 직접 그리는 '일자형' 용기 -------
-     SVG + clip-path 방식은 html2canvas가 제대로 못 그려서
-     저장 이미지가 실제 화면과 달라지는 문제가 있었음.
-     캔버스는 그린 결과가 그대로 비트맵이라 캡처해도 100% 동일함. */
   function drawFlask(canvas, percent) {
     const dpr = window.devicePixelRatio || 1;
     const cssW = 65, cssH = 92;
-    const LW = 100, LH = 142; // 논리 좌표계
+    const LW = 100, LH = 142;
 
     canvas.width = cssW * dpr * 2;
     canvas.height = cssH * dpr * 2;
@@ -425,11 +143,9 @@
     ctx.setTransform(scale, 0, 0, scale, 0, 0);
     ctx.clearRect(0, 0, LW, LH);
 
-    // 완전 직사각형 몸통 (옆면 수직 = 일자형)
     const bodyX = 26, bodyY = 28, bodyW = 48, bodyH = 104;
     const bodyBottom = bodyY + bodyH;
 
-    // 눈금 (25 / 50 / 75%)
     ctx.save();
     ctx.strokeStyle = '#94a3b8';
     ctx.globalAlpha = 0.55;
@@ -444,7 +160,6 @@
     });
     ctx.restore();
 
-    // 액체
     if (percent > 0) {
       const fillH = (percent / 100) * bodyH;
       const waterY = bodyBottom - fillH;
@@ -460,13 +175,11 @@
       ctx.fill();
     }
 
-    // 몸통 외곽선
     ctx.strokeStyle = '#94a3b8';
     ctx.lineWidth = 3;
     ctx.lineJoin = 'round';
     ctx.strokeRect(bodyX, bodyY, bodyW, bodyH);
 
-    // 상단 입구 캡
     ctx.fillStyle = '#cbd5e1';
     roundRect(ctx, bodyX - 6, bodyY - 9, bodyW + 12, 5, 2);
     ctx.fill();
