@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>테마별 거래대금 플라스크 시각화</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-hover: #0284c7;
+      --border-color: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    header p {
+      font-size: 0.875rem;
+      color: var(--text-sub);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background-color: var(--accent-blue);
+      color: #0f172a;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-hover);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background-color: #334155;
+      color: #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+      background-color: #475569;
+      color: #fff;
+    }
+
+    #capture-area {
+      background-color: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    /* Max 5 items per row grid layout */
+    .flasks-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 16px;
+      justify-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .flasks-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      }
+    }
+
+    .flask-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 10px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .delete-btn:hover {
+      opacity: 1;
+    }
+
+    .theme-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border-color);
+      color: #f1f5f9;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-align: center;
+      padding: 4px;
+      width: 85%;
+      margin-bottom: 8px;
+      outline: none;
+    }
+
+    .theme-input:focus {
+      border-bottom-color: var(--accent-blue);
+    }
+
+    /* Curved Flask Container (Original First Design) */
+    .flask-container {
+      position: relative;
+      width: 90px;
+      height: 140px;
+      border: 3px solid #94a3b8;
+      border-radius: 10px 10px 30px 30px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.03);
+      margin: 8px 0;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .liquid {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      transition: height 0.3s ease;
+    }
+
+    .wave {
+      position: absolute;
+      top: -6px;
+      left: 0;
+      width: 200%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      animation: wave 3s infinite linear;
+    }
+
+    @keyframes wave {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .percentage-badge {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .step-btn {
+      background: #334155;
+      color: #fff;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .step-btn:hover {
+      background: var(--accent-blue);
+      color: #0f172a;
+    }
+
+    .slider {
+      width: 60px;
+      accent-color: var(--accent-blue);
+    }
+
+    .save-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 14px;
+      font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🧪 테마별 자금 유입 시각화 (플라스크)</h1>
+    <p>5% 단위로 시장 체감 거래대금을 조절하고 이미지로 저장하세요.</p>
+  </header>
+
+  <div class="toolbar">
+    <button class="btn btn-secondary" onclick="addFlask()">+ 테마(플라스크) 추가</button>
+    <span style="font-size: 0.85rem; color: #64748b;">한 줄 최대 5개 배치</span>
+  </div>
+
+  <div id="capture-area">
+    <div class="flasks-grid" id="flasksGrid">
+      <!-- Dynamic Flask Cards inserted here -->
+    </div>
+  </div>
+
+  <button class="btn save-btn" onclick="saveAsPNG()">💾 이미지 저장 (PNG)</button>
+</div>
+
+<script>
+  let flasks = [
+    { id: 1, name: 'AI / 반도체', fill: 45 },
+    { id: 2, name: '로봇 / 자동화', fill: 20 },
+    { id: 3, name: '바이오 / 헬스', fill: 10 },
+    { id: 4, name: '2차전지', fill: 5 }
+  ];
+
+  function renderFlasks() {
+    const grid = document.getElementById('flasksGrid');
+    grid.innerHTML = '';
+
+    flasks.forEach((flask, index) => {
+      const card = document.createElement('div');
+      card.className = 'flask-card';
+
+      card.innerHTML = `
+        ${flasks.length > 1 ? `<button class="delete-btn" onclick="removeFlask(${index})" title="삭제">✕</button>` : ''}
+        <input type="text" class="theme-input" value="${flask.name}" onchange="updateName(${index}, this.value)" placeholder="테마명 입력" />
+        
+        <div class="flask-container">
+          <div class="liquid" style="height: ${flask.fill}%;">
+            ${flask.fill > 0 ? '<div class="wave"></div>' : ''}
+          </div>
+        </div>
+
+        <div class="percentage-badge">${flask.fill}%</div>
+
+        <div class="controls">
+          <button class="step-btn" onclick="adjustFill(${index}, -5)">-5</button>
+          <input type="range" class="slider" min="0" max="100" step="5" value="${flask.fill}" oninput="updateFill(${index}, this.value)">
+          <button class="step-btn" onclick="adjustFill(${index}, 5)">+5</button>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+  }
+
+  function adjustFill(index, delta) {
+    let newVal = flasks[index].fill + delta;
+    if (newVal < 0) newVal = 0;
+    if (newVal > 100) newVal = 100;
+    flasks[index].fill = newVal;
+    renderFlasks();
+  }
+
+  function updateFill(index, val) {
+    flasks[index].fill = parseInt(val, 10);
+    renderFlasks();
+  }
+
+  function updateName(index, val) {
+    flasks[index].name = val;
+  }
+
+  function addFlask() {
+    flasks.push({ id: Date.now(), name: `신규 테마 ${flasks.length + 1}`, fill: 0 });
+    renderFlasks();
+  }
+
+  function removeFlask(index) {
+    flasks.splice(index, 1);
+    renderFlasks();
+  }
+
+  function saveAsPNG() {
+    const captureTarget = document.getElementById('capture-area');
+    
+    html2canvas(captureTarget, {
+      backgroundColor: '#1e293b',
+      scale: 2,
+      useCORS: true
+    }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = `테마별_거래대금_플라스크_${new Date().toISOString().slice(0,10)}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }).catch(err => {
+      alert('이미지 저장 중 오류가 발생했습니다: ' + err);
+    });
+  }
+
+  renderFlasks();
+</script>
+
+</body>
+</html>
