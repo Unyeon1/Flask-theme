@@ -152,7 +152,6 @@
       justify-content: center;
     }
 
-    /* 오른쪽 여백 잘라내기: fit-content 적용 */
     #capture-area {
       background-color: var(--card-bg);
       padding: 12px;
@@ -276,6 +275,44 @@
       accent-color: var(--accent-blue);
       height: 4px;
     }
+
+    /* 이미지 보관 레이어 */
+    .image-preview-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 16px;
+    }
+
+    .image-preview-overlay img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .image-preview-overlay p {
+      color: var(--accent-blue);
+      font-size: 0.85rem;
+      margin-top: 12px;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      margin-top: 16px;
+      background: #334155;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -289,7 +326,7 @@
   <div class="toolbar">
     <div class="btn-group">
       <button class="btn btn-secondary" onclick="addFlask()">+ 테마 추가</button>
-      <button class="btn icon-btn" onclick="openImageInNewTab()" title="새 탭으로 이미지 열기">💾</button>
+      <button class="btn icon-btn" onclick="generateImage()" title="이미지 생성">💾</button>
       <button id="modeBtn" class="btn btn-mode" onclick="toggleMode()" title="모드 전환">🌊 자유 모드</button>
     </div>
     <div id="statusBadge" class="status-badge" style="display: none;">합계: 80% / 100%</div>
@@ -300,6 +337,12 @@
       <div class="flasks-grid" id="flasksGrid"></div>
     </div>
   </div>
+</div>
+
+<div id="previewOverlay" class="image-preview-overlay">
+  <div id="imageContainer"></div>
+  <p>👆 위 이미지를 길게 눌러 사진첩에 저장하세요.</p>
+  <button class="close-btn" onclick="closePreview()">닫기</button>
 </div>
 
 <script>
@@ -452,8 +495,8 @@
     renderFlasks();
   }
 
-  /* 클릭 시 새 탭으로 JPG 이미지 바로 열기 */
-  function openImageInNewTab() {
+  /* 팝업 창 없이 화면 자체에 <img> 요소 바로 출력 */
+  function generateImage() {
     const captureTarget = document.getElementById('capture-area');
     const rect = captureTarget.getBoundingClientRect();
 
@@ -465,39 +508,15 @@
       height: rect.height
     }).then(canvas => {
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const container = document.getElementById('imageContainer');
       
-      const newWin = window.open('');
-      if (newWin) {
-        newWin.document.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>이미지 저장</title>
-            <style>
-              body {
-                margin: 0;
-                background-color: #0f172a;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-              }
-              img {
-                max-width: 100%;
-                height: auto;
-                display: block;
-              }
-            </style>
-          </head>
-          <body>
-            <img src="${imgData}" alt="시장 거래대금 흐름" />
-          </body>
-          </html>
-        `);
-        newWin.document.close();
-      }
+      container.innerHTML = `<img src="${imgData}" alt="시장 거래대금 흐름" />`;
+      document.getElementById('previewOverlay').style.display = 'flex';
     });
+  }
+
+  function closePreview() {
+    document.getElementById('previewOverlay').style.display = 'none';
   }
 
   renderFlasks();
