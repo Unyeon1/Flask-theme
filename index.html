@@ -175,7 +175,7 @@
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid var(--border-color);
       border-radius: 10px;
-      padding: 8px 6px 12px 6px;
+      padding: 10px 6px 12px 6px;
       width: 135px;
       min-width: 135px;
       display: flex;
@@ -210,56 +210,42 @@
       opacity: 1;
     }
 
-    /* 타이틀 상자 영역 규격 고정 */
+    /* 타이틀 영역 고정 높이 지정 */
     .theme-title-box {
       width: 100%;
-      height: 22px;
+      height: 26px;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
-      margin-top: 0;
-      padding-top: 1px;
       overflow: hidden;
     }
 
-    /* 화면 입력 상태 입력창 */
+    /* 일반 입력 폼 */
     .theme-input {
       background: transparent;
       border: none;
       color: #f1f5f9;
       font-family: 'Noto Sans KR', sans-serif;
       font-weight: 700;
-      font-size: 0.72rem;
+      font-size: 0.78rem;
       text-align: center;
       padding: 0;
       margin: 0;
       width: 100%;
-      height: 18px;
-      line-height: 18px;
+      height: 100%;
       outline: none;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    /* 캡처/저장 전용 정적 텍스트 (html2canvas 오차 방지형) */
-    .theme-text-static {
-      color: #f1f5f9;
-      font-family: 'Noto Sans KR', sans-serif;
-      font-weight: 700;
-      font-size: 0.68rem;
-      line-height: 1.1;
-      text-align: center;
+    /* 캡처 시 잘림을 완벽 차단하는 SVG 텍스트 용 래퍼 */
+    .theme-title-svg {
       width: 100%;
-      margin: 0;
-      padding: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      height: 100%;
       display: block;
     }
 
-    /* 구분선 구조 정리 */
     .theme-divider {
       width: 85%;
       height: 1px;
@@ -455,21 +441,13 @@
               </clipPath>
             </defs>
             
-            <!-- 액체 영역 -->
+            <!-- 용액 및 수면 (눈금선 전면 제거) -->
             <g clip-path="url(#flask-clip-${index})">
               <rect x="0" y="${waterY}" width="100" height="${fillHeight + 10}" fill="url(#grad-${index})" />
               ${percent > 0 ? `<ellipse cx="50" cy="${waterY}" rx="30" ry="2.5" fill="#bae6fd" opacity="0.9"/>` : ''}
             </g>
 
-            <!-- 내부 눈금선 (클립패스로 완벽 차단) -->
-            <g clip-path="url(#flask-clip-${index})">
-              <line x1="62" y1="85" x2="76" y2="85" stroke="#94a3b8" stroke-width="1.5" opacity="0.7"/>
-              <line x1="58" y1="70" x2="70" y2="70" stroke="#94a3b8" stroke-width="1.5" opacity="0.7"/>
-              <line x1="54" y1="55" x2="64" y2="55" stroke="#94a3b8" stroke-width="1.5" opacity="0.7"/>
-              <line x1="50" y1="40" x2="58" y2="40" stroke="#94a3b8" stroke-width="1.5" opacity="0.7"/>
-            </g>
-
-            <!-- 플라스크 라인 -->
+            <!-- 플라스크 외곽선 -->
             <polygon points="38,20 62,20 62,35 80,100 20,100 38,35" 
                      fill="none" stroke="#94a3b8" stroke-width="3" stroke-linejoin="round" />
             <rect x="34" y="16" width="32" height="4" rx="2" fill="#cbd5e1" />
@@ -539,20 +517,25 @@
     renderFlasks();
   }
 
+  /* 캡처 시 SVG <text>로 수치화하여 글자 잘림을 100% 원천 방지 */
   function generateImage() {
     document.fonts.ready.then(() => {
       const titleBoxes = document.querySelectorAll('.theme-title-box');
       const savedInputs = [];
 
-      // 캡처 전 텍스트 변환
       titleBoxes.forEach((box) => {
         const input = box.querySelector('.theme-input');
+        const textVal = input ? input.value : '';
         savedInputs.push(input);
-        const staticDiv = document.createElement('span');
-        staticDiv.className = 'theme-text-static';
-        staticDiv.innerText = input ? input.value : '';
-        box.innerHTML = '';
-        box.appendChild(staticDiv);
+
+        // 글자가 절대 안 잘리는 SVG Vector Text 적용
+        box.innerHTML = `
+          <svg class="theme-title-svg" viewBox="0 0 120 26">
+            <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" 
+                  fill="#f1f5f9" font-family="'Noto Sans KR', sans-serif" 
+                  font-weight="700" font-size="12">${textVal}</text>
+          </svg>
+        `;
       });
 
       const captureTarget = document.getElementById('capture-area');
