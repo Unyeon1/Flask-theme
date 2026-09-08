@@ -75,7 +75,7 @@
     .btn-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .btn {
@@ -108,9 +108,37 @@
       color: #fff;
     }
 
+    .btn-mode {
+      background-color: #334155;
+      color: #e2e8f0;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-mode.active {
+      background-color: #0284c7;
+      color: #ffffff;
+      border-color: #38bdf8;
+    }
+
     .icon-btn {
       padding: 6px 10px;
       font-size: 0.95rem;
+    }
+
+    .status-badge {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .status-badge.exceeded {
+      color: #f87171;
+      background: rgba(248, 113, 113, 0.1);
+      border-color: rgba(248, 113, 113, 0.2);
     }
 
     #capture-area {
@@ -119,7 +147,6 @@
       border-radius: 10px;
     }
 
-    /* 노션 내에서 한 줄에 4개 이상 배치되도록 컴팩트 그리드 설정 */
     .flasks-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
@@ -242,8 +269,9 @@
     <div class="btn-group">
       <button class="btn btn-secondary" onclick="addFlask()">+ 테마 추가</button>
       <button class="btn icon-btn" onclick="saveAsPNG()" title="이미지 저장">💾</button>
+      <button id="modeBtn" class="btn btn-mode" onclick="toggleMode()" title="모드 전환">🌊 자유 모드</button>
     </div>
-    <span style="font-size: 0.75rem; color: #64748b;">한 줄 4개 기준</span>
+    <div id="statusBadge" class="status-badge" style="display: none;">합계: 80% / 100%</div>
   </div>
 
   <div id="capture-area">
@@ -252,12 +280,46 @@
 </div>
 
 <script>
+  let isLimitMode = false; // false: 자유 모드(🌊), true: 총량 100% 제한 모드(📊)
   let flasks = [
     { id: 1, name: 'AI / 반도체', fill: 45 },
     { id: 2, name: '로봇 / 자동화', fill: 20 },
     { id: 3, name: '바이오 / 헬스', fill: 10 },
     { id: 4, name: '2차전지', fill: 5 }
   ];
+
+  function getTotalFill() {
+    return flasks.reduce((acc, f) => acc + f.fill, 0);
+  }
+
+  function toggleMode() {
+    isLimitMode = !isLimitMode;
+    const modeBtn = document.getElementById('modeBtn');
+    const statusBadge = document.getElementById('statusBadge');
+
+    if (isLimitMode) {
+      modeBtn.innerHTML = '📊 100% 제한 모드';
+      modeBtn.classList.add('active');
+      statusBadge.style.display = 'inline-block';
+    } else {
+      modeBtn.innerHTML = '🌊 자유 모드';
+      modeBtn.classList.remove('active');
+      statusBadge.style.display = 'none';
+    }
+    updateStatus();
+    renderFlasks();
+  }
+
+  function updateStatus() {
+    const total = getTotalFill();
+    const statusBadge = document.getElementById('statusBadge');
+    statusBadge.innerText = `합계: ${total}% / 100%`;
+    if (total > 100) {
+      statusBadge.classList.add('exceeded');
+    } else {
+      statusBadge.classList.remove('exceeded');
+    }
+  }
 
   function renderFlasks() {
     const grid = document.getElementById('flasksGrid');
@@ -287,18 +349,15 @@
               </clipPath>
             </defs>
             
-            <!-- 깔끔하고 정갈한 선명한 액체 표현 (끊김 없음) -->
             <g clip-path="url(#flask-clip-${index})">
               <rect x="0" y="${waterY}" width="100" height="${fillHeight + 10}" fill="url(#grad-${index})" />
               ${percent > 0 ? `<ellipse cx="50" cy="${waterY}" rx="30" ry="2.5" fill="#bae6fd" opacity="0.9"/>` : ''}
             </g>
 
-            <!-- 플라스크 유리의 선명한 외곽선 -->
             <polygon points="38,20 62,20 62,35 80,100 20,100 38,35" 
                      fill="none" stroke="#94a3b8" stroke-width="3" stroke-linejoin="round" />
             <rect x="34" y="16" width="32" height="4" rx="2" fill="#cbd5e1" />
 
-            <!-- 정밀 정밀 비커 눈금 표시 (Graduation Marks) -->
             <line x1="68" y1="85" x2="75" y2="85" stroke="#94a3b8" stroke-width="1.5" opacity="0.8"/>
             <line x1="63" y1="70" x2="72" y2="70" stroke="#94a3b8" stroke-width="1.5" opacity="0.8"/>
             <line x1="58" y1="55" x2="68" y2="55" stroke="#94a3b8" stroke-width="1.5" opacity="0.8"/>
@@ -317,18 +376,41 @@
 
       grid.appendChild(card);
     });
+
+    updateStatus();
   }
 
   function adjustFill(index, delta) {
-    let newVal = flasks[index].fill + delta;
+    let currentTotal = getTotalFill();
+    let currentVal = flasks[index].fill;
+    let newVal = currentVal + delta;
+
     if (newVal < 0) newVal = 0;
     if (newVal > 100) newVal = 100;
+
+    if (isLimitMode && delta > 0) {
+      if (currentTotal + delta > 100) {
+        newVal = currentVal + (100 - currentTotal);
+      }
+    }
+
     flasks[index].fill = newVal;
     renderFlasks();
   }
 
   function updateFill(index, val) {
-    flasks[index].fill = parseInt(val, 10);
+    let targetVal = parseInt(val, 10);
+    let currentVal = flasks[index].fill;
+    let currentTotal = getTotalFill();
+    let diff = targetVal - currentVal;
+
+    if (isLimitMode && diff > 0) {
+      if (currentTotal + diff > 100) {
+        targetVal = currentVal + (100 - currentTotal);
+      }
+    }
+
+    flasks[index].fill = targetVal;
     renderFlasks();
   }
 
