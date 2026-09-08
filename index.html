@@ -268,7 +268,7 @@
   <div class="toolbar">
     <div class="btn-group">
       <button class="btn btn-secondary" onclick="addFlask()">+ 테마 추가</button>
-      <button class="btn icon-btn" onclick="saveAsPNG()" title="이미지 저장">💾</button>
+      <button class="btn icon-btn" onclick="saveAsJPG()" title="JPG 저장">💾</button>
       <button id="modeBtn" class="btn btn-mode" onclick="toggleMode()" title="모드 전환">🌊 자유 모드</button>
     </div>
     <div id="statusBadge" class="status-badge" style="display: none;">합계: 80% / 100%</div>
@@ -280,7 +280,7 @@
 </div>
 
 <script>
-  let isLimitMode = false; // false: 자유 모드(🌊), true: 총량 100% 제한 모드(📊)
+  let isLimitMode = false;
   let flasks = [
     { id: 1, name: 'AI / 반도체', fill: 45 },
     { id: 2, name: '로봇 / 자동화', fill: 20 },
@@ -428,19 +428,46 @@
     renderFlasks();
   }
 
-  function saveAsPNG() {
+  function saveAsJPG() {
     const captureTarget = document.getElementById('capture-area');
     html2canvas(captureTarget, {
       backgroundColor: '#1e293b',
       scale: 2,
       useCORS: true
     }).then(canvas => {
-      const link = document.createElement('a');
-      link.download = `시장_거래대금_흐름_${new Date().toISOString().slice(0,10)}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      // JPG 포맷으로 변환 (품질 0.95)
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      
+      // 모바일/PC 대응: 새 창으로 이미지를 열어서 손쉽게 '사진 앱 저장' 및 이미지 다운로드 유도
+      const newTab = window.open();
+      if (newTab) {
+        newTab.document.write(`
+          <html>
+            <head>
+              <title>이미지 저장</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body { margin: 0; background-color: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; box-sizing: border-box; }
+                img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); margin-bottom: 16px; }
+                p { font-size: 14px; color: #94a3b8; margin: 0; }
+              </style>
+            </head>
+            <body>
+              <img src="${imgData}" alt="시장 거래대금 흐름" />
+              <p>💡 이미지를 <b>길게 누르면 [사진에 추가]</b>를 눌러 사진 앱에 바로 저장할 수 있습니다.</p>
+            </body>
+          </html>
+        `);
+        newTab.document.close();
+      } else {
+        // 팝업 차단 시 일반 다운로드 링크로 차선 처리
+        const link = document.createElement('a');
+        link.download = `시장_거래대금_흐름_${new Date().toISOString().slice(0,10)}.jpg`;
+        link.href = imgData;
+        link.click();
+      }
     }).catch(err => {
-      alert('이미지 저장 중 오류가 발생했습니다: ' + err);
+      alert('이미지 생성 중 오류가 발생했습니다: ' + err);
     });
   }
 
