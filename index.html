@@ -210,24 +210,21 @@
       opacity: 1;
     }
 
-    /* 타이틀 영역 고정 높이 지정 */
     .theme-title-box {
       width: 100%;
-      height: 26px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
 
-    /* 일반 입력 폼 */
     .theme-input {
       background: transparent;
       border: none;
       color: #f1f5f9;
       font-family: 'Noto Sans KR', sans-serif;
       font-weight: 700;
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       text-align: center;
       padding: 0;
       margin: 0;
@@ -239,19 +236,12 @@
       text-overflow: ellipsis;
     }
 
-    /* 캡처 시 잘림을 완벽 차단하는 SVG 텍스트 용 래퍼 */
-    .theme-title-svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
     .theme-divider {
       width: 85%;
       height: 1px;
       background-color: var(--border-color);
-      margin-top: 2px;
-      margin-bottom: 12px;
+      margin-top: 4px;
+      margin-bottom: 10px;
     }
 
     .flask-visual {
@@ -262,10 +252,10 @@
     }
 
     .percentage-badge {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: var(--accent-blue);
-      margin-bottom: 6px;
+      margin-top: 4px;
     }
 
     .controls {
@@ -274,6 +264,7 @@
       gap: 3px;
       width: 100%;
       justify-content: center;
+      margin-top: 8px;
     }
 
     .step-btn {
@@ -298,6 +289,11 @@
       width: 42px;
       accent-color: var(--accent-blue);
       height: 4px;
+    }
+
+    /* 캡처 시 숨겨지는 요소 클래스 */
+    .hide-on-capture {
+      display: none !important;
     }
 
     .image-preview-overlay {
@@ -423,7 +419,7 @@
       const waterY = 100 - fillHeight;
 
       card.innerHTML = `
-        ${flasks.length > 1 ? `<button class="delete-btn" onclick="removeFlask(${index})" title="삭제">✕</button>` : ''}
+        ${flasks.length > 1 ? `<button class="delete-btn hide-target" onclick="removeFlask(${index})" title="삭제">✕</button>` : ''}
         <div class="theme-title-box">
           <input type="text" class="theme-input" value="${flask.name}" onchange="updateName(${index}, this.value)" placeholder="테마명" />
         </div>
@@ -441,7 +437,7 @@
               </clipPath>
             </defs>
             
-            <!-- 용액 및 수면 (눈금선 전면 제거) -->
+            <!-- 액체 채우기 (눈금선 완전히 제거됨) -->
             <g clip-path="url(#flask-clip-${index})">
               <rect x="0" y="${waterY}" width="100" height="${fillHeight + 10}" fill="url(#grad-${index})" />
               ${percent > 0 ? `<ellipse cx="50" cy="${waterY}" rx="30" ry="2.5" fill="#bae6fd" opacity="0.9"/>` : ''}
@@ -456,7 +452,8 @@
 
         <div class="percentage-badge">${flask.fill}%</div>
 
-        <div class="controls">
+        <!-- 슬라이더 및 조작 버튼 (-5, +5) -->
+        <div class="controls hide-target">
           <button class="step-btn" onclick="adjustFill(${index}, -5)">-5</button>
           <input type="range" class="slider" min="0" max="100" step="5" value="${flask.fill}" oninput="updateFill(${index}, this.value)">
           <button class="step-btn" onclick="adjustFill(${index}, 5)">+5</button>
@@ -517,9 +514,14 @@
     renderFlasks();
   }
 
-  /* 캡처 시 SVG <text>로 수치화하여 글자 잘림을 100% 원천 방지 */
+  /* 이미지 생성 함수 */
   function generateImage() {
     document.fonts.ready.then(() => {
+      // 1. 조작용 요소(-5, +5 바 및 삭제 버튼) 숨기기
+      const hideTargets = document.querySelectorAll('.hide-target');
+      hideTargets.forEach(el => el.classList.add('hide-on-capture'));
+
+      // 2. 텍스트를 SVG 벡터 텍스트로 치환하여 잘림 완벽 방지
       const titleBoxes = document.querySelectorAll('.theme-title-box');
       const savedInputs = [];
 
@@ -528,10 +530,9 @@
         const textVal = input ? input.value : '';
         savedInputs.push(input);
 
-        // 글자가 절대 안 잘리는 SVG Vector Text 적용
         box.innerHTML = `
-          <svg class="theme-title-svg" viewBox="0 0 120 26">
-            <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" 
+          <svg width="100%" height="100%" viewBox="0 0 120 28" style="display:block;">
+            <text x="50%" y="18" text-anchor="middle" 
                   fill="#f1f5f9" font-family="'Noto Sans KR', sans-serif" 
                   font-weight="700" font-size="12">${textVal}</text>
           </svg>
@@ -539,16 +540,14 @@
       });
 
       const captureTarget = document.getElementById('capture-area');
-      const rect = captureTarget.getBoundingClientRect();
 
       html2canvas(captureTarget, {
         backgroundColor: '#1e293b',
         scale: 2,
-        useCORS: true,
-        width: rect.width,
-        height: rect.height
+        useCORS: true
       }).then(canvas => {
-        // 복구
+        // 복구: 숨긴 조작 요소 및 input 화면 복원
+        hideTargets.forEach(el => el.classList.remove('hide-on-capture'));
         titleBoxes.forEach((box, i) => {
           box.innerHTML = '';
           box.appendChild(savedInputs[i]);
