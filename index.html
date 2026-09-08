@@ -149,8 +149,8 @@
 
     .flasks-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
       justify-items: center;
     }
 
@@ -158,9 +158,9 @@
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid var(--border-color);
       border-radius: 10px;
-      padding: 10px 4px;
+      padding: 12px 6px;
       width: 100%;
-      max-width: 135px;
+      max-width: 145px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -185,25 +185,29 @@
       line-height: 1;
       opacity: 0.7;
       transition: opacity 0.2s;
+      z-index: 2;
     }
 
     .delete-btn:hover {
       opacity: 1;
     }
 
+    /* 텍스트 겹침 문제 해결 스타일 */
     .theme-input {
       background: transparent;
       border: none;
       border-bottom: 1px solid var(--border-color);
       color: #f1f5f9;
       font-weight: 600;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       text-align: center;
-      padding: 2px;
-      width: 88%;
-      margin-bottom: 6px;
+      padding: 2px 0 4px 0;
+      width: 90%;
+      margin-top: 4px;
+      margin-bottom: 10px;
       outline: none;
       text-overflow: ellipsis;
+      line-height: 1.2;
     }
 
     .theme-input:focus {
@@ -254,6 +258,57 @@
       width: 42px;
       accent-color: var(--accent-blue);
       height: 4px;
+    }
+
+    /* 모바일 저장용 팝업 레이어 */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #1e293b;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      max-width: 90%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    .modal-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .modal-content p {
+      font-size: 0.85rem;
+      color: #38bdf8;
+      margin-bottom: 12px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .modal-close-btn {
+      background: #334155;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -435,37 +490,25 @@
       scale: 2,
       useCORS: true
     }).then(canvas => {
-      // JPG 포맷으로 변환 (품질 0.95)
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      
-      // 모바일/PC 대응: 새 창으로 이미지를 열어서 손쉽게 '사진 앱 저장' 및 이미지 다운로드 유도
-      const newTab = window.open();
-      if (newTab) {
-        newTab.document.write(`
-          <html>
-            <head>
-              <title>이미지 저장</title>
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                body { margin: 0; background-color: #0f172a; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; box-sizing: border-box; }
-                img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); margin-bottom: 16px; }
-                p { font-size: 14px; color: #94a3b8; margin: 0; }
-              </style>
-            </head>
-            <body>
-              <img src="${imgData}" alt="시장 거래대금 흐름" />
-              <p>💡 이미지를 <b>길게 누르면 [사진에 추가]</b>를 눌러 사진 앱에 바로 저장할 수 있습니다.</p>
-            </body>
-          </html>
-        `);
-        newTab.document.close();
-      } else {
-        // 팝업 차단 시 일반 다운로드 링크로 차선 처리
-        const link = document.createElement('a');
-        link.download = `시장_거래대금_흐름_${new Date().toISOString().slice(0,10)}.jpg`;
-        link.href = imgData;
-        link.click();
-      }
+
+      // 팝업 차단 없는 모달 레이어 생성
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <img src="${imgData}" alt="시장 거래대금 흐름" />
+          <p>💡 이미지를 <b>길게 누르면 [사진에 추가]</b>하여 바로 저장할 수 있습니다.</p>
+          <button class="modal-close-btn" onclick="this.closest('.modal-overlay').remove()">닫기</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      // PC 다운로드 지원
+      const link = document.createElement('a');
+      link.download = `시장_거래대금_흐름_${new Date().toISOString().slice(0,10)}.jpg`;
+      link.href = imgData;
+      link.click();
     }).catch(err => {
       alert('이미지 생성 중 오류가 발생했습니다: ' + err);
     });
