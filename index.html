@@ -146,20 +146,27 @@
       border-color: rgba(248, 113, 113, 0.2);
     }
 
-    /* 캡처 영역 - 딱 필요한 크기만큼 여백 맞춰 캡처되도록 수정 */
+    .capture-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* 오른쪽 여백 잘라내기: fit-content 적용 */
     #capture-area {
       background-color: var(--card-bg);
       padding: 12px;
       border-radius: 10px;
       display: inline-block;
-      max-width: 100%;
+      width: fit-content;
+      box-sizing: border-box;
     }
 
     .flasks-grid {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: row;
       gap: 10px;
-      justify-content: center;
+      align-items: center;
     }
 
     .flask-card {
@@ -168,10 +175,12 @@
       border-radius: 10px;
       padding: 12px 6px;
       width: 135px;
+      min-width: 135px;
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
+      box-sizing: border-box;
     }
 
     .delete-btn {
@@ -199,7 +208,6 @@
       opacity: 1;
     }
 
-    /* 입력창 및 독자적 구분선 스타일 */
     .theme-input {
       background: transparent;
       border: none;
@@ -208,8 +216,8 @@
       font-size: 0.8rem;
       text-align: center;
       padding: 2px 0;
-      width: 90%;
-      margin-top: 6px;
+      width: 100%;
+      margin-top: 4px;
       outline: none;
       text-overflow: ellipsis;
       line-height: 1.2;
@@ -219,7 +227,7 @@
       width: 85%;
       height: 1px;
       background-color: var(--border-color);
-      margin-top: 4px;
+      margin-top: 6px;
       margin-bottom: 8px;
     }
 
@@ -268,56 +276,6 @@
       accent-color: var(--accent-blue);
       height: 4px;
     }
-
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      padding: 20px;
-    }
-
-    .modal-content {
-      background: #1e293b;
-      padding: 16px;
-      border-radius: 12px;
-      border: 1px solid #334155;
-      max-width: 95%;
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow-y: auto;
-    }
-
-    .modal-content img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-
-    .modal-content p {
-      font-size: 0.85rem;
-      color: #38bdf8;
-      margin-bottom: 12px;
-      text-align: center;
-      font-weight: 600;
-    }
-
-    .modal-close-btn {
-      background: #334155;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
@@ -331,14 +289,16 @@
   <div class="toolbar">
     <div class="btn-group">
       <button class="btn btn-secondary" onclick="addFlask()">+ 테마 추가</button>
-      <button class="btn icon-btn" onclick="saveAsJPG()" title="JPG 저장">💾</button>
+      <button class="btn icon-btn" onclick="openImageInNewTab()" title="새 탭으로 이미지 열기">💾</button>
       <button id="modeBtn" class="btn btn-mode" onclick="toggleMode()" title="모드 전환">🌊 자유 모드</button>
     </div>
     <div id="statusBadge" class="status-badge" style="display: none;">합계: 80% / 100%</div>
   </div>
 
-  <div id="capture-area">
-    <div class="flasks-grid" id="flasksGrid"></div>
+  <div class="capture-wrapper">
+    <div id="capture-area">
+      <div class="flasks-grid" id="flasksGrid"></div>
+    </div>
   </div>
 </div>
 
@@ -492,482 +452,51 @@
     renderFlasks();
   }
 
-  function saveAsJPG() {
+  /* 클릭 시 새 탭으로 JPG 이미지 바로 열기 */
+  function openImageInNewTab() {
     const captureTarget = document.getElementById('capture-area');
+    const rect = captureTarget.getBoundingClientRect();
+
     html2canvas(captureTarget, {
       backgroundColor: '#1e293b',
       scale: 2,
-      useCORS: true
+      useCORS: true,
+      width: rect.width,
+      height: rect.height
     }).then(canvas => {
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-      const modal = document.createElement('div');
-      modal.className = 'modal-overlay';
-      modal.innerHTML = `
-        <div class="modal-content">
-          <img src="${imgData}" alt="시장 거래대금 흐름" />
-          <p>💡 이미지를 <b>길게 누르면 [사진에 추가]</b>하여 바로 저장할 수 있습니다.</p>
-          <button class="modal-close-btn" onclick="this.closest('.modal-overlay').remove()">닫기</button>
-        </div>
-      `;
-      document.body.appendChild(modal);
-
-      const link = document.createElement('a');
-      link.download = `시장_거래대금_흐름_${new Date().toISOString().slice(0,10)}.jpg`;
-      link.href = imgData;
-      link.click();
-    });
-  }
-
-  renderFlasks();
-</script>
-
-</body>
-</html>      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    .btn-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn {
-      background-color: var(--accent-blue);
-      color: #0f172a;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 0.82rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .btn:hover {
-      background-color: var(--accent-hover);
-      color: #fff;
-    }
-
-    .btn-secondary {
-      background-color: #334155;
-      color: #e2e8f0;
-    }
-
-    .btn-secondary:hover {
-      background-color: #475569;
-      color: #fff;
-    }
-
-    .btn-mode {
-      background-color: #334155;
-      color: #e2e8f0;
-      border: 1px solid var(--border-color);
-    }
-
-    .btn-mode.active {
-      background-color: #0284c7;
-      color: #ffffff;
-      border-color: #38bdf8;
-    }
-
-    .icon-btn {
-      padding: 6px 10px;
-      font-size: 0.95rem;
-    }
-
-    .status-badge {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--accent-blue);
-      background: rgba(56, 189, 248, 0.1);
-      padding: 4px 8px;
-      border-radius: 4px;
-      border: 1px solid rgba(56, 189, 248, 0.2);
-    }
-
-    .status-badge.exceeded {
-      color: #f87171;
-      background: rgba(248, 113, 113, 0.1);
-      border-color: rgba(248, 113, 113, 0.2);
-    }
-
-    #capture-area {
-      background-color: var(--card-bg);
-      padding: 10px 4px;
-      border-radius: 10px;
-    }
-
-    .flasks-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 10px;
-      justify-items: center;
-    }
-
-    .flask-card {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 12px 6px;
-      width: 100%;
-      max-width: 145px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-    }
-
-    .delete-btn {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      background: #ef4444;
-      color: white;
-      border: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      font-size: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
-      opacity: 0.7;
-      transition: opacity 0.2s;
-      z-index: 2;
-    }
-
-    .delete-btn:hover {
-      opacity: 1;
-    }
-
-    /* 텍스트 겹침 문제 해결 스타일 */
-    .theme-input {
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--border-color);
-      color: #f1f5f9;
-      font-weight: 600;
-      font-size: 0.85rem;
-      text-align: center;
-      padding: 2px 0 4px 0;
-      width: 90%;
-      margin-top: 4px;
-      margin-bottom: 10px;
-      outline: none;
-      text-overflow: ellipsis;
-      line-height: 1.2;
-    }
-
-    .theme-input:focus {
-      border-bottom-color: var(--accent-blue);
-    }
-
-    .flask-visual {
-      width: 65px;
-      height: 90px;
-      margin: 2px 0;
-      position: relative;
-    }
-
-    .percentage-badge {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: var(--accent-blue);
-      margin-bottom: 6px;
-    }
-
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      width: 100%;
-      justify-content: center;
-    }
-
-    .step-btn {
-      background: #334155;
-      color: #fff;
-      border: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 4px;
-      font-weight: bold;
-      font-size: 0.7rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .step-btn:hover {
-      background: var(--accent-blue);
-      color: #0f172a;
-    }
-
-    .slider {
-      width: 42px;
-      accent-color: var(--accent-blue);
-      height: 4px;
-    }
-
-    /* 모바일 저장용 팝업 레이어 */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      padding: 20px;
-    }
-
-    .modal-content {
-      background: #1e293b;
-      padding: 16px;
-      border-radius: 12px;
-      border: 1px solid #334155;
-      max-width: 90%;
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow-y: auto;
-    }
-
-    .modal-content img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-
-    .modal-content p {
-      font-size: 0.85rem;
-      color: #38bdf8;
-      margin-bottom: 12px;
-      text-align: center;
-      font-weight: 600;
-    }
-
-    .modal-close-btn {
-      background: #334155;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <header>
-    <h1>🧪 시장 거래대금 흐름</h1>
-    <p>5% 단위로 시장 체감 거래대금을 조절하고 저장하세요.</p>
-  </header>
-
-  <div class="toolbar">
-    <div class="btn-group">
-      <button class="btn btn-secondary" onclick="addFlask()">+ 테마 추가</button>
-      <button class="btn icon-btn" onclick="saveAsJPG()" title="JPG 저장">💾</button>
-      <button id="modeBtn" class="btn btn-mode" onclick="toggleMode()" title="모드 전환">🌊 자유 모드</button>
-    </div>
-    <div id="statusBadge" class="status-badge" style="display: none;">합계: 80% / 100%</div>
-  </div>
-
-  <div id="capture-area">
-    <div class="flasks-grid" id="flasksGrid"></div>
-  </div>
-</div>
-
-<script>
-  let isLimitMode = false;
-  let flasks = [
-    { id: 1, name: 'AI / 반도체', fill: 45 },
-    { id: 2, name: '로봇 / 자동화', fill: 20 },
-    { id: 3, name: '바이오 / 헬스', fill: 10 },
-    { id: 4, name: '2차전지', fill: 5 }
-  ];
-
-  function getTotalFill() {
-    return flasks.reduce((acc, f) => acc + f.fill, 0);
-  }
-
-  function toggleMode() {
-    isLimitMode = !isLimitMode;
-    const modeBtn = document.getElementById('modeBtn');
-    const statusBadge = document.getElementById('statusBadge');
-
-    if (isLimitMode) {
-      modeBtn.innerHTML = '📊 100% 제한 모드';
-      modeBtn.classList.add('active');
-      statusBadge.style.display = 'inline-block';
-    } else {
-      modeBtn.innerHTML = '🌊 자유 모드';
-      modeBtn.classList.remove('active');
-      statusBadge.style.display = 'none';
-    }
-    updateStatus();
-    renderFlasks();
-  }
-
-  function updateStatus() {
-    const total = getTotalFill();
-    const statusBadge = document.getElementById('statusBadge');
-    statusBadge.innerText = `합계: ${total}% / 100%`;
-    if (total > 100) {
-      statusBadge.classList.add('exceeded');
-    } else {
-      statusBadge.classList.remove('exceeded');
-    }
-  }
-
-  function renderFlasks() {
-    const grid = document.getElementById('flasksGrid');
-    grid.innerHTML = '';
-
-    flasks.forEach((flask, index) => {
-      const card = document.createElement('div');
-      card.className = 'flask-card';
-
-      const percent = flask.fill;
-      const fillHeight = (percent / 100) * 70; 
-      const waterY = 100 - fillHeight;
-
-      card.innerHTML = `
-        ${flasks.length > 1 ? `<button class="delete-btn" onclick="removeFlask(${index})" title="삭제">✕</button>` : ''}
-        <input type="text" class="theme-input" value="${flask.name}" onchange="updateName(${index}, this.value)" placeholder="테마명" />
-        
-        <div class="flask-visual">
-          <svg viewBox="0 0 100 115" width="100%" height="100%">
-            <defs>
-              <linearGradient id="grad-${index}" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85" />
-                <stop offset="100%" stop-color="#0284c7" stop-opacity="0.95" />
-              </linearGradient>
-              <clipPath id="flask-clip-${index}">
-                <polygon points="38,20 62,20 62,35 80,100 20,100 38,35" />
-              </clipPath>
-            </defs>
-            
-            <g clip-path="url(#flask-clip-${index})">
-              <rect x="0" y="${waterY}" width="100" height="${fillHeight + 10}" fill="url(#grad-${index})" />
-              ${percent > 0 ? `<ellipse cx="50" cy="${waterY}" rx="30" ry="2.5" fill="#bae6fd" opacity="0.9"/>` : ''}
-            </g>
-
-            <polygon points="38,20 62,20 62,35 80,100 20,100 38,35" 
-                     fill="none" stroke="#94a3b8" stroke-width="3" stroke-linejoin="round" />
-            <rect x="34" y="16" width="32" height="4" rx="2" fill="#cbd5e1" />
-
-            <line x1="68" y1="85" x2="75" y2="85" stroke="#94a3b8" stroke-width="1.5" opacity="0.8"/>
-            <line x1="63" y1="70" x2="72" y2="70" stroke="#94a3b8" stroke-width="1.5" opacity="0.8"/>
-            <line x1="58" y1="55" x2="68" y2="55" stroke="#94a3b8" stroke-width="1.5" opacity="0.8"/>
-            <line x1="52" y1="40" x2="63" y2="40" stroke="#94a3b8" stroke-width="1.5" opacity="0.8"/>
-          </svg>
-        </div>
-
-        <div class="percentage-badge">${flask.fill}%</div>
-
-        <div class="controls">
-          <button class="step-btn" onclick="adjustFill(${index}, -5)">-5</button>
-          <input type="range" class="slider" min="0" max="100" step="5" value="${flask.fill}" oninput="updateFill(${index}, this.value)">
-          <button class="step-btn" onclick="adjustFill(${index}, 5)">+5</button>
-        </div>
-      `;
-
-      grid.appendChild(card);
-    });
-
-    updateStatus();
-  }
-
-  function adjustFill(index, delta) {
-    let currentTotal = getTotalFill();
-    let currentVal = flasks[index].fill;
-    let newVal = currentVal + delta;
-
-    if (newVal < 0) newVal = 0;
-    if (newVal > 100) newVal = 100;
-
-    if (isLimitMode && delta > 0) {
-      if (currentTotal + delta > 100) {
-        newVal = currentVal + (100 - currentTotal);
+      
+      const newWin = window.open('');
+      if (newWin) {
+        newWin.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>이미지 저장</title>
+            <style>
+              body {
+                margin: 0;
+                background-color: #0f172a;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+              }
+              img {
+                max-width: 100%;
+                height: auto;
+                display: block;
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${imgData}" alt="시장 거래대금 흐름" />
+          </body>
+          </html>
+        `);
+        newWin.document.close();
       }
-    }
-
-    flasks[index].fill = newVal;
-    renderFlasks();
-  }
-
-  function updateFill(index, val) {
-    let targetVal = parseInt(val, 10);
-    let currentVal = flasks[index].fill;
-    let currentTotal = getTotalFill();
-    let diff = targetVal - currentVal;
-
-    if (isLimitMode && diff > 0) {
-      if (currentTotal + diff > 100) {
-        targetVal = currentVal + (100 - currentTotal);
-      }
-    }
-
-    flasks[index].fill = targetVal;
-    renderFlasks();
-  }
-
-  function updateName(index, val) {
-    flasks[index].name = val;
-  }
-
-  function addFlask() {
-    flasks.push({ id: Date.now(), name: `신규 테마 ${flasks.length + 1}`, fill: 0 });
-    renderFlasks();
-  }
-
-  function removeFlask(index) {
-    flasks.splice(index, 1);
-    renderFlasks();
-  }
-
-  function saveAsJPG() {
-    const captureTarget = document.getElementById('capture-area');
-    html2canvas(captureTarget, {
-      backgroundColor: '#1e293b',
-      scale: 2,
-      useCORS: true
-    }).then(canvas => {
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-      // 팝업 차단 없는 모달 레이어 생성
-      const modal = document.createElement('div');
-      modal.className = 'modal-overlay';
-      modal.innerHTML = `
-        <div class="modal-content">
-          <img src="${imgData}" alt="시장 거래대금 흐름" />
-          <p>💡 이미지를 <b>길게 누르면 [사진에 추가]</b>하여 바로 저장할 수 있습니다.</p>
-          <button class="modal-close-btn" onclick="this.closest('.modal-overlay').remove()">닫기</button>
-        </div>
-      `;
-      document.body.appendChild(modal);
-
-      // PC 다운로드 지원
-      const link = document.createElement('a');
-      link.download = `시장_거래대금_흐름_${new Date().toISOString().slice(0,10)}.jpg`;
-      link.href = imgData;
-      link.click();
-    }).catch(err => {
-      alert('이미지 생성 중 오류가 발생했습니다: ' + err);
     });
   }
 
